@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Widget</title>
+
+    <!-- Google Fonts: Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <style>
+        /* General reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #ffffff;
+            color: #4e4e4e;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 90%;
+            max-width: 1200px;
+        }
+
+        .left, .right {
+            text-align: center;
+            font-weight: 600; /* Bold weight for titles */
+        }
+
+        .left span, .right span {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 300;
+            margin-top: 4px;
+            color: #888; /* Light mode subtext */
+        }
+
+        .center {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 400;
+        }
+
+        .weather-icon {
+            display: inline-block;
+            margin-top: 10px;
+            font-size: 4rem;
+        }
+
+        .temp {
+            font-size: 2rem;
+            font-weight: 600;
+        }
+
+        .condition {
+            margin-top: 4px;
+            font-size: 1rem;
+            font-weight: 300;
+            color: #888;
+        }
+
+        /* Dark Mode Styles */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: #121212;
+                color: #f5f5f5;
+            }
+
+            .left span, .right span, .condition {
+                color: #bbbbbb;
+            }
+
+            .weather-icon {
+                color: #f5f5f5;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Left Section -->
+        <div class="left">
+            Loading...
+            <span>WEATHER</span>
+        </div>
+
+        <!-- Center Icon -->
+        <div class="center">
+            <div class="weather-icon" id="weather-icon">--</div>
+        </div>
+
+        <!-- Right Section -->
+        <div class="right">
+            <div class="temp" id="temperature">-- °C</div>
+            <div class="condition" id="condition">Loading...</div>
+        </div>
+    </div>
+
+    <script>
+        // Function to fetch weather data
+        async function fetchWeather() {
+            try {
+                const response = await fetch("https://wttr.in/?format=j1");
+                const data = await response.json();
+                console.log(data);
+
+                // Extract current weather data
+                const currentCondition = data.current_condition[0];
+                const location = `${data.nearest_area[0].areaName[0].value}, ${data.nearest_area[0].country[0].value}`;
+                const temperatureC = currentCondition.temp_C;
+                const weatherDesc = currentCondition.weatherDesc[0].value;
+
+                // Update the HTML elements with fetched data
+                document.getElementById("temperature").innerText = `${temperatureC} °C`;
+                document.getElementsByClassName("left")[0].innerHTML = location + "<span>WEATHER</span>";
+                document.getElementById("condition").innerText = weatherDesc;
+
+                // Update weather icon based on condition (basic example)
+                const icon = document.getElementById("weather-icon");
+
+                if (weatherDesc.toLowerCase().includes("cloud")) {
+                    icon.innerText = "☁️"; // Cloudy
+                } else if (weatherDesc.toLowerCase().includes("sunny") || weatherDesc.toLowerCase().includes("clear")) {
+                    icon.innerText = "☀️"; // Sunny or Clear
+                } else if (weatherDesc.toLowerCase().includes("rain")) {
+                    icon.innerText = "🌧️"; // Rainy
+                } else if (weatherDesc.toLowerCase().includes("thunder")) {
+                    icon.innerText = "⛈️"; // Thunderstorm
+                } else if (weatherDesc.toLowerCase().includes("snow")) {
+                    icon.innerText = "❄️"; // Snow
+                } else if (weatherDesc.toLowerCase().includes("fog") || weatherDesc.toLowerCase().includes("haze")) {
+                    icon.innerText = "🌫️"; // Foggy or Hazy
+                } else if (weatherDesc.toLowerCase().includes("wind")) {
+                    icon.innerText = "💨"; // Windy
+                } else if (weatherDesc.toLowerCase().includes("smoke")) {
+                    icon.innerText = "🌫️"; // Smoky
+                } else {
+                    icon.innerText = "🌤️"; // Default: Partly Cloudy
+                }
+            } catch (error) {
+                console.error("Error fetching weather data:", error);
+                document.getElementById("condition").innerText = "Unable to load weather.";
+            }
+        }
+
+        // Call the function when the page loads
+        window.onload = fetchWeather;
+    </script>
+</body>
+</html>
